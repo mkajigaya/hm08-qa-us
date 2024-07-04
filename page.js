@@ -7,13 +7,11 @@ module.exports = {
     cardNumberField: '#number',
     cardCodeField: 'input#code.card-input',
     checkboxCard1: '#card-1',
-    messageField: '//label[contains(text(), "Message to the driver...")]',
-    message: 'input#comment.input',
-    
-    
+    messageField: '//input[@id="comment"]',
     
     //miscellaneous
     outsideCardCode: 'div class="head">Adding a card</div>',
+    counterValue: '.counter-value',
 
     // Buttons
     callATaxiButton: 'button=Call a taxi',
@@ -24,23 +22,19 @@ module.exports = {
     paymentMethodButton: '.pp-text',
     addCardButton: 'div=Add card',
     linkButton: 'button=Link',
-    requirementButton: 'div=Order requirements',
-    blancketSwitch: '//div[contains(text(), "Blanket and handkerchiefs")]//input[@class="switch-input"]',
+    blancketSwitch: '.switch',
+    blancketSwitchCheck: '.switch-input',
     orderButton: 'span.smart-button-main',
     ppCloseButton: '//div[@class="payment-picker open"]//div[@class="section active"]//button[@class="close-button section-close"]',
-    plusCounter: '//div[@class="r-counter-container"]//div[contains(text(), "Ice cream")]//div[@class=counter-plus]',
-    counterValue: '//div[@class="r-counter-container"]//div[contains(text(), "Ice cream")]//div[@class="counter-value"]',
-
-
+    plusCounter: 'div=+',
     
     // Modals
     phoneNumberModal: '.modal',
     paymentModal: '.pp-selector',
     addACardModal: '.card-wrapper',
     requirementBody: '.reqs-body',
-    carSearchModal: '//div[contains(text(), "Car search")]',
+    carSearchModal: 'div=Car search',
 
-    
     // Functions
     fillAddresses: async function(from, to) {
         const fromField = await $(this.fromField);
@@ -67,7 +61,6 @@ module.exports = {
         await phoneNumberField.setValue(phoneNumber);
     },
     submitCardInfo: async function(cardNumber, cardCode) {
-        //await this.fillCardNumber(cardNumber);
         const paymentMethodButton = await $(this.paymentMethodButton);
         await paymentMethodButton.click();
         const paymentModal = await $(this.paymentModal);
@@ -94,33 +87,23 @@ module.exports = {
 
     submitPhoneNumber: async function(phoneNumber) {
         await this.fillPhoneNumber(phoneNumber);
-        // we are starting interception of request from the moment of method call
         await browser.setupInterceptor();
         await $(this.nextButton).click();
-        // we should wait for response
-        // eslint-disable-next-line wdio/no-pause
         await browser.pause(2000);
         const smsCodeField = await $(this.smsCodeField);
-        // collect all responses
         const requests = await browser.getRequests();
-        // use first response
         await expect(requests.length).toBe(1)
         const code = await requests[0].response.body.code
         await smsCodeField.setValue(code)
         await $(this.confirmButton).click()
     },
-    writeAMessageForADriver: async function() {
-        const messageField = await $(page.messageField);
-        await messageField.waitForDisplayed();
-        await messageField.click();
-        const message = await $(page.message);
-        await message.setValue('Get some apples.');
+    writeAMessageForADriver: async function(actualMessage) {
+        const messageField = await $(this.messageField);
+        await messageField.waitForDisplayed ();
+        messageField.setValue(actualMessage);
     },
     orderABlanketAndHandkerchiefs: async function() {
-        const requirementButton = await $(page.requirementButton);
-        await requirementButton.click();
-        //check the selecter
-        const blancketSwitch = await $(page.blancketSwitch);
+        const blancketSwitch = await $(this.blancketSwitch);
         await blancketSwitch.waitForDisplayed();
         await blancketSwitch.click();
     },    

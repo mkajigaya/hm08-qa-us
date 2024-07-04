@@ -1,5 +1,5 @@
 const page = require('../../page');
-const helper = require('../../helper')
+const helper = require('../../helper');
 
 describe('Order a taxi', () => {
     it('should set addresses', async () => {
@@ -40,14 +40,15 @@ describe('Order a taxi', () => {
         let cardCode = await helper.getCardCode();
         await page.submitCardInfo(cardNumber, cardCode);
         const checkboxCard1 = await $(page.checkboxCard1);
-        await expect(checkboxCard1).toHaveAttribute('checked');
+        await expect(checkboxCard1).toBeChecked();
     });
 
     it('should write a message for a driver', async () => {
         await browser.url(`/`);
         await page.fillAddresses('East 2nd Street, 601', '1300 1st St');
-        await page.writeAMessageForADriver();
-        await expect(message).toHaveAttribute('value', 'Get some apples.');
+        const actualMessage = 'Bring some apples.';
+        await page.writeAMessageForADriver(actualMessage);
+        await expect($(page.messageField)).toHaveValue(actualMessage);
     });
 
     it('should order a Blanket and handkerchiefs', async () => {
@@ -55,21 +56,18 @@ describe('Order a taxi', () => {
         await page.fillAddresses('East 2nd Street, 601', '1300 1st St');
         await page.selectSupportive();
         await page.orderABlanketAndHandkerchiefs(); 
-        await expect(blancketSwitch).toBeEnabled; // how do I verify this?
+        await expect($(page.blancketSwitchCheck)).toBeChecked();
     });
 
     it('should order 2 Ice creams', async () => {
         await browser.url(`/`);
         await page.fillAddresses('East 2nd Street, 601', '1300 1st St');
         await page.selectSupportive();
-        const requirementButton = await $(page.requirementButton);
-        await requirementButton.click();
-        // plusCounter & counterValue likely to have wrong selecters.
         const plusCounter = await $(page.plusCounter);
         await plusCounter.click();
         await plusCounter.click();
         const counterValue = await $(page.counterValue);
-        await expect(counterValue).toHaveAttribute('counter-value', 2);
+        await expect(counterValue).toHaveText("2");        
     });
 
     it('should show the car search modal', async () => {
@@ -84,13 +82,12 @@ describe('Order a taxi', () => {
         await page.submitCardInfo(cardNumber, cardCode);
         const ppCloseButton = await $(page.ppCloseButton);
         await ppCloseButton.click();
-        await page.writeAMessageForADriver();
+        const actualMessage = 'Test message.';
+        await page.writeAMessageForADriver(actualMessage);
         const orderButton = await $(page.orderButton);
-        await orderButton.toBeDisplayed();
+        await orderButton.waitForDisplayed();
         await orderButton.click();
         const carSearchModal = await $(page.carSearchModal);
         await expect(carSearchModal).toBeDisplayed();
     });
-
-    
 });
